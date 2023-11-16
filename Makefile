@@ -31,6 +31,9 @@ proto: default
 
 ts: default
 	dotnet run -p ./src/IFC-gen.csproj -e $(SCHEMA) -l ts -o ./lang/typescript/src
+	
+java: default
+	dotnet run -p ./src/IFC-gen.csproj -e $(SCHEMA) -l java -o /Users/koo/Documents/java-ifc/src/main/java/com/howbuild/ifc/v4 -j com.howbuild.ifc.v4
 
 debug_parser: generate_debug
 	dotnet build ./src/IFC-gen.csproj

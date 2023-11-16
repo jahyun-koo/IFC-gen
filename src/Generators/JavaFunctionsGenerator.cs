@@ -5,8 +5,15 @@ using Express;
 
 namespace IFC4.Generators;
 
-public class CsharpFunctionsGenerator : IFunctionsGenerator
+public class JavaFunctionsGenerator : IFunctionsGenerator
 {
+    private readonly string package;
+
+    public JavaFunctionsGenerator(string package)
+    {
+        this.package = package;
+    }
+
     public string FileName => "Functions.g.cs";
 
     public Dictionary<string, SelectType> SelectData { get; set; } = new();
@@ -14,16 +21,13 @@ public class CsharpFunctionsGenerator : IFunctionsGenerator
     public string Generate(IEnumerable<FunctionData> functionDatas)
     {
         return $@"
-using System;
-using System.Collections.Generic;
+{package};
 
-namespace IFC
+public static class Functions
 {{
-    public static class Functions
-    {{
-        {Functions(functionDatas)}
-    }}
-}}";
+    {Functions(functionDatas)}
+}}
+";
     }
 
     private static string Functions(IEnumerable<FunctionData> functionDatas)

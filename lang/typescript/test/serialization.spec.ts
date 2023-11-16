@@ -1,14 +1,14 @@
 import * as IFC from "../src/index"
-import { expect } from "chai"
+import {expect} from "chai"
 import "mocha"
-import { BaseIfc } from "../src/BaseIfc"
-import { Model } from "../src/Model"
+import {BaseIfc} from "../src/BaseIfc"
+import {Model} from "../src/Model"
 
 describe("Model", () => {
     it("should serialize to XML", () => {
         let project = new IFC.IfcProject("foo")
         project.HasAssignments = new Array<IFC.IfcRelAssigns>()
-        project.HasAssignments.push(new IFC.IfcRelAssignsToActor(null,null,null))
+        project.HasAssignments.push(new IFC.IfcRelAssignsToActor(null, null, null))
         project.Name = "Test Project"
         project.Description = "A project for testing."
 
@@ -31,24 +31,24 @@ describe("Model", () => {
         let designerOrg = new IFC.IfcOrganization("Hipster Design Company")
         model.addInstance(designerOrg)
 
-        let user = new IFC.IfcPersonAndOrganization(person,designerOrg)
+        let user = new IFC.IfcPersonAndOrganization(person, designerOrg)
         model.addInstance(user)
 
         let softwareOrg = new IFC.IfcOrganization("Serious Software Company")
         model.addInstance(softwareOrg)
 
-        let app = new IFC.IfcApplication(softwareOrg,"1.0","IFC-gen","IFC-gen")
+        let app = new IFC.IfcApplication(softwareOrg, "1.0", "IFC-gen", "IFC-gen")
         model.addInstance(app)
 
         let date = Date.now()
         let ownerHistory = new IFC.IfcOwnerHistory(user, app, date)
         ownerHistory.ChangeAction = IFC.IfcChangeActionEnum.NOTDEFINED
         model.addInstance(ownerHistory)
-        
+
         let project = new IFC.IfcProject("Test Project")
         model.addInstance(project)
 
-        let rel = new IFC.IfcRelAssignsToActor(null,null,null)
+        let rel = new IFC.IfcRelAssignsToActor(null, null, null)
         model.addInstance(rel)
         project.HasAssignments = new Array<IFC.IfcRelAssigns>()
         project.HasAssignments.push(rel)
@@ -78,10 +78,10 @@ describe("Model", () => {
         let time = new IFC.IfcSIUnit(null, IFC.IfcUnitEnum.TIMEUNIT, IFC.IfcSIUnitName.SECOND)
         model.addInstance(time)
 
-        let dimExp = new IFC.IfcDimensionalExponents(0,0,0,0,0,0,0)
+        let dimExp = new IFC.IfcDimensionalExponents(0, 0, 0, 0, 0, 0, 0)
         model.addInstance(dimExp)
 
-        let meas = new IFC.IfcMeasureWithUnit(1.745e-2,planeAngle)
+        let meas = new IFC.IfcMeasureWithUnit(1.745e-2, planeAngle)
         model.addInstance(meas)
 
         let conv = new IFC.IfcConversionBasedUnit(dimExp, IFC.IfcUnitEnum.PLANEANGLEUNIT, "DEGREE", meas)
@@ -93,7 +93,7 @@ describe("Model", () => {
         let lum = new IFC.IfcSIUnit(null, IFC.IfcUnitEnum.LUMINOUSINTENSITYUNIT, IFC.IfcSIUnitName.LUMEN)
         model.addInstance(lum)
 
-        units.push(length,area,volume,planeAngle,solidAngle,mass,time,therm,lum)
+        units.push(length, area, volume, planeAngle, solidAngle, mass, time, therm, lum)
         let unitsAssignment = new IFC.IfcUnitAssignment(units)
         model.addInstance(unitsAssignment)
         project.UnitsInContext = unitsAssignment
@@ -104,25 +104,25 @@ describe("Model", () => {
         expect(step).to.not.equal(null)
     })
 
-    it("should encode page offset strings per ISO 10303-11", () =>{
+    it("should encode page offset strings per ISO 10303-11", () => {
         let test = "Ä"
         let result = BaseIfc.encode(test)
         expect(result).to.equal("\\X2\\00C4\\X0\\")
     })
 
-    it("should encode apostrophes per ISO 10303-11", () =>{
+    it("should encode apostrophes per ISO 10303-11", () => {
         let test = "Don't"
         let result = BaseIfc.encode(test)
         expect(result).to.equal("Don\"t")
     })
 
-    it("should encode empty strings per ISO 10303-11", () =>{
+    it("should encode empty strings per ISO 10303-11", () => {
         let test = ""
         let result = BaseIfc.encode(test)
         expect(result).to.equal("\"")
     })
 
-    it("should serialize a number using scientific notation per ISO 10303-11", () =>{
+    it("should serialize a number using scientific notation per ISO 10303-11", () => {
         let test = 0.01745
         let result = BaseIfc.toStepValue(test)
         expect(result).to.equal("1.745E-2")
