@@ -162,13 +162,15 @@ public abstract class TypeData
 {
     protected ILanguageGenerator generator;
 
-    public TypeData(string name, ILanguageGenerator generator)
+    public TypeData(string name, string schema, ILanguageGenerator generator)
     {
         this.generator = generator;
+        Schema = schema;
         Name = name;
     }
 
     public string Name { get; set; }
+    public string Schema { get; set; }
 }
 
 /// <summary>
@@ -176,8 +178,8 @@ public abstract class TypeData
 /// </summary>
 public abstract class CollectionTypeData : TypeData
 {
-    public CollectionTypeData(string name, ILanguageGenerator generator, IEnumerable<string> values) : base(name,
-        generator)
+    public CollectionTypeData(string name, string schema, ILanguageGenerator generator, IEnumerable<string> values) :
+        base(name, schema, generator)
     {
         Values = values;
     }
@@ -195,8 +197,9 @@ public abstract class CollectionTypeData : TypeData
 /// </summary>
 public class WrapperType : TypeData
 {
-    public WrapperType(string name, string wrappedType, ILanguageGenerator generator, bool isCollectionType, int rank) :
-        base(name, generator)
+    public WrapperType(string name, string schema, string wrappedType, ILanguageGenerator generator,
+        bool isCollectionType, int rank) :
+        base(name, schema, generator)
     {
         IsCollectionType = isCollectionType;
         Rank = rank;
@@ -230,7 +233,8 @@ public class WrapperType : TypeData
 /// </summary>
 public class EnumType : CollectionTypeData
 {
-    public EnumType(string name, ILanguageGenerator generator, IEnumerable<string> values) : base(name, generator,
+    public EnumType(string name, string schema, ILanguageGenerator generator, IEnumerable<string> values) : base(name,
+        schema, generator,
         values)
     {
     }
@@ -246,7 +250,8 @@ public class EnumType : CollectionTypeData
 /// </summary>
 public class SelectType : CollectionTypeData
 {
-    public SelectType(string name, ILanguageGenerator generator, IEnumerable<string> values) : base(name, generator,
+    public SelectType(string name, string schema, ILanguageGenerator generator, IEnumerable<string> values) : base(name,
+        schema, generator,
         values)
     {
     }
@@ -262,7 +267,7 @@ public class SelectType : CollectionTypeData
 /// </summary>
 public class Entity : TypeData
 {
-    public Entity(string name, ILanguageGenerator generator) : base(name, generator)
+    public Entity(string name, string schema, ILanguageGenerator generator) : base(name, schema, generator)
     {
         Name = name;
         Supers = new List<Entity>();

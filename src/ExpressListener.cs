@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Antlr4.Runtime;
+using Antlr4.Runtime.Misc;
 using IFC4.Generators;
 
 namespace Express;
@@ -24,6 +26,11 @@ public class ExpressListener : ExpressBaseListener
     {
     }
 
+    private string GetSchema(ParserRuleContext context)
+    {
+        return context.Start.InputStream.GetText(new Interval(context.Start.StartIndex, context.Stop.StopIndex));
+    }
+
     // TYPE
     public override void EnterTypeBody(ExpressParser.TypeBodyContext context)
     {
@@ -38,27 +45,27 @@ public class ExpressListener : ExpressBaseListener
         {
             var wrappedType = ParseCollectionType(context.typeSel().collectionType(), ref rank, ref returnsCollection,
                 ref isGeneric);
-            td = new WrapperType(name, wrappedType, generator, returnsCollection, rank);
+            td = new WrapperType(name, GetSchema(context), wrappedType, generator, returnsCollection, rank);
         }
         else if (context.typeSel().simpleType() != null)
         {
             var wrappedType = ParseSimpleType(context.typeSel().simpleType());
-            td = new WrapperType(name, wrappedType, generator, returnsCollection, rank);
+            td = new WrapperType(name, GetSchema(context), wrappedType, generator, returnsCollection, rank);
         }
         else if (context.typeSel().namedType() != null)
         {
             var wrappedType = ParseNamedType(context.typeSel().namedType());
-            td = new WrapperType(name, wrappedType, generator, returnsCollection, rank);
+            td = new WrapperType(name, GetSchema(context), wrappedType, generator, returnsCollection, rank);
         }
         else if (context.typeSel().enumType() != null)
         {
             var values = context.typeSel().enumType().enumValues().GetText().Split(',');
-            td = new EnumType(name, generator, values);
+            td = new EnumType(name, GetSchema(context), generator, values);
         }
         else if (context.typeSel().selectType() != null)
         {
             var values = context.typeSel().selectType().selectValues().GetText().Split(',');
-            td = new SelectType(name, generator, values);
+            td = new SelectType(name, GetSchema(context), generator, values);
         }
 
         TypeData.Add(name, td);
@@ -78,7 +85,7 @@ public class ExpressListener : ExpressBaseListener
         }
         else
         {
-            entity = new Entity(entityName, generator);
+            entity = new Entity(entityName, GetSchema(context), generator);
             TypeData.Add(entityName, entity);
         }
 
@@ -103,7 +110,7 @@ public class ExpressListener : ExpressBaseListener
                     }
                     else
                     {
-                        sup = new Entity(superName, generator);
+                        sup = new Entity(superName, GetSchema(context), generator);
                         TypeData.Add(superName, sup);
                     }
 
@@ -123,7 +130,7 @@ public class ExpressListener : ExpressBaseListener
                 }
                 else
                 {
-                    sub = new Entity(subName, generator);
+                    sub = new Entity(subName, GetSchema(context), generator);
                     TypeData.Add(subName, sub);
                 }
 

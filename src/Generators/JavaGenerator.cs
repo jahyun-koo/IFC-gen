@@ -103,6 +103,15 @@ public class JavaLanguageGenerator : ILanguageGenerator
             //ex) Collection<SomeSimpleType>
         }
 
+
+        var constructorTokens = $@"
+    public static final List<List<TypeToken>> CONSTRUCTORS = new ArrayList<>();
+    static {{
+        List<TypeToken> c1 = new ArrayList<>();
+        c1.add(new TypeToken<{WrappedType(data)}>() {{}});
+        CONSTRUCTORS.add(c1);
+    }}";
+
         var result =
             $@"{package};
 
@@ -113,10 +122,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 	
-/// <summary>
-/// http://www.buildingsmart-tech.org/ifc/IFC4/final/html/link/{data.Name.ToLower()}.htm
-/// </summary>
+/*
+{data.Schema}
+@link http://www.buildingsmart-tech.org/ifc/IFC4/final/html/link/{data.Name.ToLower()}.htm
+*/
 public class {data.Name} extends BaseIfc {GetSelectImplementsString(data.Name, isWrapped: true)}{{
+{constructorTokens}
     protected {WrappedType(data)} value;
 
     public {WrappedType(data)} getValue() {{
@@ -151,9 +162,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 	
-/// <summary>
-/// http://www.buildingsmart-tech.org/ifc/IFC4/final/html/link/{data.Name.ToLower()}.htm
-/// </summary>
+/*
+{data.Schema}
+@link http://www.buildingsmart-tech.org/ifc/IFC4/final/html/link/{data.Name.ToLower()}.htm
+*/
 public enum {data.Name} {{{string.Join(",", data.Values)}}}
 ";
         return result;
@@ -181,6 +193,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 	
+/*
+{data.Schema}
+@link http://www.buildingsmart-tech.org/ifc/IFC4/final/html/link/{data.Name.ToLower()}.htm
+*/
 public interface {data.Name} {GetSelectImplementsString(data.Name, false, true)}{{
 }}
 ";
@@ -267,9 +283,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 	
-/// <summary>
-/// <see href=""http://www.buildingsmart-tech.org/ifc/IFC4/final/html/link/{data.Name.ToLower()}.htm""/>
-/// </summary>
+/*
+{data.Schema}
+@link http://www.buildingsmart-tech.org/ifc/IFC4/final/html/link/{data.Name.ToLower()}.htm
+*/
 public {modifier} {data.Name} extends {super} {GetSelectImplementsString(data.Name)}{{
 {data.Properties(SelectData)}
 {constructorTokens}
@@ -372,10 +389,8 @@ public class IfcRegistry {{
     private string WrappedType(WrapperType data)
     {
         if (data.IsCollectionType)
-        {
-        return
-            $"{string.Join("", Enumerable.Repeat("Collection<", data.Rank))}{data.WrappedType}{string.Join("", Enumerable.Repeat(">", data.Rank))}";
-        }
+            return
+                $"{string.Join("", Enumerable.Repeat("Collection<", data.Rank))}{data.WrappedType}{string.Join("", Enumerable.Repeat(">", data.Rank))}";
 
         return data.WrappedType;
     }
