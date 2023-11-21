@@ -1,46 +1,62 @@
+import java.util.Base64;
 import java.util.UUID;
-import com.howbuild.ifc.v4.ConvertibleToStep;
 
 public abstract class BaseIfc implements ConvertibleToStep {
-  private UUID id;
-  private int stepId;
+    private String id;
+    private int stepId;
 
-  public BaseIfc() {
-    this.id = UUID.randomUUID();
-  }
+    public BaseIfc() {
+        // Create a new UUID
+        UUID uuid = UUID.randomUUID();
 
-  public String toStep() {
-    String ifcClass = getClass().getName().toUpperCase();
-    return "#" + stepId + " = " + ifcClass + "(" + this.getStepParameters() + ");";
-  }
+        // Convert the UUID to a byte array
+        byte[] bytes = new byte[16];
+        long msb = uuid.getMostSignificantBits();
+        long lsb = uuid.getLeastSignificantBits();
+        for (int i = 0; i < 8; i++) {
+            bytes[i] = (byte) ((msb >> 8 * (7 - i)) & 0xFF);
+            bytes[i + 8] = (byte) ((lsb >> 8 * (7 - i)) & 0xFF);
+        }
 
-  @Override
-  public String toStepValue(boolean isSelectOption) {
-    return "#" + stepId;
-  }
+        // Encode the byte array as a Base64 string
+        String base64Uuid = Base64.getEncoder().withoutPadding().encodeToString(bytes);
 
-  @Override
-  public String toStepValue() {
-    return toStepValue(false);
-  }
+        // Replace the unsupported characters
+        this.id = base64Uuid.replace('/', '_').replace('+', '-');
+    }
 
-  public String getStepParameters() {
-    return "";
-  }
+    public String toStep() {
+        String ifcClass = getClass().getName().toUpperCase();
+        return "#" + stepId + " = " + ifcClass + "(" + this.getStepParameters() + ");";
+    }
 
-  public UUID getId() {
-    return id;
-  }
+    @Override
+    public String toStepValue(boolean isSelectOption) {
+        return "#" + stepId;
+    }
 
-  public void setId(UUID id) {
-    this.id = id;
-  }
+    @Override
+    public String toStepValue() {
+        return toStepValue(false);
+    }
 
-  public int getStepId() {
-    return stepId;
-  }
+    public String getStepParameters() {
+        return "";
+    }
 
-  public void setStepId(int stepId) {
-    this.stepId = stepId;
-  }
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public int getStepId() {
+        return stepId;
+    }
+
+    public void setStepId(int stepId) {
+        this.stepId = stepId;
+    }
 }
