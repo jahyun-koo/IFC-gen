@@ -262,10 +262,27 @@ public class SelectType : CollectionTypeData
     }
 }
 
+public class InverseAttr
+{
+    public string entityName;
+    public string name;
+    public string inverseType;
+    public string inverseAttrName;
+
+    public InverseAttr(string entityName, string name, string inverseType, string inverseAttrName)
+    {
+        this.entityName = entityName;
+        this.name = name;
+        this.inverseType = inverseType;
+        this.inverseAttrName = inverseAttrName;
+    }
+}
+
 /// <summary>
 ///     An Entity object stores information about IFC ENTITY types.
 /// </summary>
 public class Entity : TypeData
+
 {
     public Entity(string name, string schema, ILanguageGenerator generator) : base(name, schema, generator)
     {

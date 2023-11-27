@@ -122,6 +122,9 @@ internal class Program
             .ToDictionary(t => t.Key, t => (EnumType)t.Value);
         generator.EnumData = ed;
 
+        generator.InverseAttrs = listener.InverseAttrData;
+        generator.Listener = listener;
+
         foreach (var kvp in listener.TypeData)
         {
             var td = kvp.Value;

@@ -27,6 +27,8 @@ public class JavaLanguageGenerator : ILanguageGenerator
     public Dictionary<string, List<string>> InversedSelectData { get; set; }
     public Dictionary<string, EnumType> EnumData { get; set; }
     public Dictionary<string, WrapperType> WrapperData { get; set; }
+    public Dictionary<string, List<InverseAttr>> InverseAttrs { get; set; }
+    public ExpressListener Listener { get; set; }
 
     public string AttributeDataType(bool isCollection, int rank, string type, bool isGeneric)
     {
@@ -273,6 +275,52 @@ public interface {data.Name} {GetSelectImplementsString(data.Name, false, true)}
 {Allocations(data, true)}
 {Assignments(data, false)}
 		}}";
+        
+        //todo process relationship data
+        string processRelationship = null;
+        if (Listener.InverseAttrData.ContainsKey(data.Name))
+        {
+            var attrs = Listener.InverseAttrData[data.Name];
+            var attrProcess = new List<string>();
+            var sample = "";
+            foreach (var attr in attrs)
+            {
+                var inverseAttrTypeData = data.Attributes.Find(x => x.Name == attr.inverseAttrName);
+                var targetData = (Entity) Listener.TypeData[attr.entityName];
+                var targetAttrTypeData = targetData.Attributes.Find(x => x.Name == attr.name);
+                if (inverseAttrTypeData.IsCollection)
+                {
+                    if (targetAttrTypeData.IsCollection)
+                    {
+                    var process = $@"
+if (this.{inverseAttrTypeData.ParameterName} != null) {{
+    for (
+    this.{inverseAttrTypeData.ParameterName}. 
+}}";
+                    }
+                    else
+                    {
+                        
+                    }
+                }
+                else
+                {
+                    if (targetAttrTypeData.IsCollection)
+                    {
+                        
+                    }
+                    else
+                    {
+                        
+                    }
+                }
+            }
+            
+            processRelationship = $@"
+    private void set{data.Name}Relationship() {{
+
+    }}";
+        }
 
         var classStr = $@"{package};
 
@@ -293,6 +341,7 @@ public {modifier} {data.Name} extends {super} {GetSelectImplementsString(data.Na
 {constructors}
 {StepParameters(data)}
 }}
+{processRelationship}
 ";
         return classStr;
     }

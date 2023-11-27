@@ -22,6 +22,8 @@ public class ExpressListener : ExpressBaseListener
 
     public Dictionary<string, FunctionData> FunctionData { get; } = new();
 
+    public Dictionary<string, List<InverseAttr>> InverseAttrData { get; } = new();
+
     public override void EnterSchemaDecl(ExpressParser.SchemaDeclContext context)
     {
     }
@@ -233,6 +235,19 @@ public class ExpressListener : ExpressBaseListener
                     var ad = new AttributeData(generator, name, type, rank, isCollection, false, false, optional,
                         inverse);
                     entity.Attributes.Add(ad);
+
+                    var inverseType = new InverseAttr(entity.Name, name, type, invAttr.inverseDef().attrRef().GetText());
+                    if (InverseAttrData.ContainsKey(inverseType.inverseType))
+                    {
+                        var attrList = InverseAttrData[inverseType.inverseType];
+                        attrList.Add(inverseType);
+                    }
+                    else
+                    {
+                        var attrList = new List<InverseAttr>();
+                        attrList.Add(inverseType);
+                        InverseAttrData.Add(inverseType.inverseType, attrList);
+                    }
                 }
                 else if (invAttr.inverseRedef() != null)
                 {
@@ -244,6 +259,20 @@ public class ExpressListener : ExpressBaseListener
                     var ad = new AttributeData(generator, name, type, rank, isCollection, false, false, optional,
                         inverse);
                     entity.Attributes.Add(ad);
+                    
+
+                    var inverseType = new InverseAttr(entity.Name, name, type, invAttr.inverseRedef().attrRef()[1].GetText());
+                    if (InverseAttrData.ContainsKey(inverseType.inverseType))
+                    {
+                        var attrList = InverseAttrData[inverseType.inverseType];
+                        attrList.Add(inverseType);
+                    }
+                    else
+                    {
+                        var attrList = new List<InverseAttr>();
+                        attrList.Add(inverseType);
+                        InverseAttrData.Add(inverseType.inverseType, attrList);
+                    }
                 }
             }
         }

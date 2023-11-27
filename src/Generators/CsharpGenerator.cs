@@ -11,6 +11,8 @@ public class CsharpLanguageGenerator : ILanguageGenerator
     public Dictionary<string, List<string>> InversedSelectData { get; set; }
     public Dictionary<string, EnumType> EnumData { get; set; }
     public Dictionary<string, WrapperType> WrapperData { get; set; }
+    public Dictionary<string, List<InverseAttr>> InverseAttrs { get; set; }
+    public ExpressListener Listener { get; set; }
 
     public string AttributeDataType(bool isCollection, int rank, string type, bool isGeneric)
     {
