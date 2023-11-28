@@ -265,9 +265,9 @@ public class SelectType : CollectionTypeData
 public class InverseAttr
 {
     public string entityName;
-    public string name;
-    public string inverseType;
     public string inverseAttrName;
+    public string inverseType;
+    public string name;
 
     public InverseAttr(string entityName, string name, string inverseType, string inverseAttrName)
     {

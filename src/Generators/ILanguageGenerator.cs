@@ -31,9 +31,9 @@ public interface ILanguageGenerator
     Dictionary<string, EnumType> EnumData { get; set; }
 
     public Dictionary<string, WrapperType> WrapperData { get; set; }
-    
+
     public Dictionary<string, List<InverseAttr>> InverseAttrs { get; set; }
-    
+
     public ExpressListener Listener { get; set; }
 
     /// <summary>

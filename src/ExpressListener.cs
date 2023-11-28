@@ -236,7 +236,8 @@ public class ExpressListener : ExpressBaseListener
                         inverse);
                     entity.Attributes.Add(ad);
 
-                    var inverseType = new InverseAttr(entity.Name, name, type, invAttr.inverseDef().attrRef().GetText());
+                    var inverseType =
+                        new InverseAttr(entity.Name, name, type, invAttr.inverseDef().attrRef().GetText());
                     if (InverseAttrData.ContainsKey(inverseType.inverseType))
                     {
                         var attrList = InverseAttrData[inverseType.inverseType];
@@ -259,9 +260,10 @@ public class ExpressListener : ExpressBaseListener
                     var ad = new AttributeData(generator, name, type, rank, isCollection, false, false, optional,
                         inverse);
                     entity.Attributes.Add(ad);
-                    
 
-                    var inverseType = new InverseAttr(entity.Name, name, type, invAttr.inverseRedef().attrRef()[1].GetText());
+
+                    var inverseType = new InverseAttr(entity.Name, name, type,
+                        invAttr.inverseRedef().attrRef()[1].GetText());
                     if (InverseAttrData.ContainsKey(inverseType.inverseType))
                     {
                         var attrList = InverseAttrData[inverseType.inverseType];

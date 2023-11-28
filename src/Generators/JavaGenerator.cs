@@ -211,6 +211,82 @@ public interface {data.Name} {GetSelectImplementsString(data.Name, false, true)}
         if (data.Subs.Any()) super = data.Subs[0].Name;
 
         var modifier = data.IsAbstract ? "abstract class" : "class";
+        
+        //todo process relationship data
+        var processRelationship = "";
+        var callProcessRelationship = "";
+            
+        if (Listener.InverseAttrData.ContainsKey(data.Name))
+        {
+            var attrs = Listener.InverseAttrData[data.Name];
+            var attrProcess = new List<string>();
+            var sample = "";
+            foreach (var attr in attrs)
+            {
+                var inverseAttrTypeData = data.Attributes.Find(x => x.Name == attr.inverseAttrName);
+                var targetData = (Entity)Listener.TypeData[attr.entityName];
+                var targetAttrTypeData = targetData.Attributes.Find(x => x.Name == attr.name);
+                if (inverseAttrTypeData.IsCollection)
+                {
+                    if (targetAttrTypeData.IsCollection)
+                    {
+                        var process = $@"
+if (this.{inverseAttrTypeData.ParameterName} != null) {{
+    for ({inverseAttrTypeData.type} x : this.{inverseAttrTypeData.ParameterName}) {{
+        if (x instanceof {attr.entityName})
+            (({attr.entityName})x).{targetAttrTypeData.ParameterName}.add(this);
+    }}
+}}";
+                        attrProcess.Add(process);
+                    }
+                    else
+                    {
+                        var process = $@"
+if (this.{inverseAttrTypeData.ParameterName} != null) {{
+    for ({inverseAttrTypeData.type} x : this.{inverseAttrTypeData.ParameterName}) {{
+        if (x instanceof {attr.entityName})
+            (({attr.entityName})x).{targetAttrTypeData.ParameterName} = this;
+    }}
+}}";
+                        attrProcess.Add(process);
+                    }
+                }
+                else
+                {
+                    if (targetAttrTypeData.IsCollection)
+                    {
+                        var process = $@"
+if (this.{inverseAttrTypeData.ParameterName} != null) {{
+    if (this.{inverseAttrTypeData.ParameterName} instanceof {attr.entityName})
+        (({attr.entityName})this.{inverseAttrTypeData.ParameterName}).{targetAttrTypeData.ParameterName}.add(this);
+}}";
+                        attrProcess.Add(process);
+                    }
+                    else
+                    {
+                        var process = $@"
+if (this.{inverseAttrTypeData.ParameterName} != null) {{
+    if (this.{inverseAttrTypeData.ParameterName} instanceof {attr.entityName})
+        (({attr.entityName})this.{inverseAttrTypeData.ParameterName}).{targetAttrTypeData.ParameterName} = this;
+}}";
+                        attrProcess.Add(process);
+                    }
+                }
+            }
+
+            var allProcessAssignments = string.Join(
+                "\n",
+                attrProcess.SelectMany(x => x.Split("\n")
+                    .Select(x => "\t\t" + x)
+                ));
+            processRelationship = $@"
+    private void set{data.Name}Relationship() {{
+{allProcessAssignments}
+    }}";
+            
+            callProcessRelationship = $"this.set{data.Name}Relationship();";
+        }
+        
 
         var constructorTokens = "";
         if (!data.IsAbstract)
@@ -256,6 +332,7 @@ public interface {data.Name} {GetSelectImplementsString(data.Name, false, true)}
         super({BaseConstructorParams(data, false)});
 {Allocations(data, true)}
 {Assignments(data, false)}
+        {callProcessRelationship}
 		}}
     /// <summary>
     /// Construct a {data.Name} with required and optional attributes.
@@ -264,6 +341,7 @@ public interface {data.Name} {GetSelectImplementsString(data.Name, false, true)}
         super({BaseConstructorParams(data, true)});
 {Allocations(data, false)}
 {Assignments(data, true)}
+        {callProcessRelationship}
 		}}";
         else
             constructors = $@"
@@ -274,53 +352,9 @@ public interface {data.Name} {GetSelectImplementsString(data.Name, false, true)}
         super({BaseConstructorParams(data, false)});
 {Allocations(data, true)}
 {Assignments(data, false)}
+        {callProcessRelationship}
 		}}";
-        
-        //todo process relationship data
-        string processRelationship = null;
-        if (Listener.InverseAttrData.ContainsKey(data.Name))
-        {
-            var attrs = Listener.InverseAttrData[data.Name];
-            var attrProcess = new List<string>();
-            var sample = "";
-            foreach (var attr in attrs)
-            {
-                var inverseAttrTypeData = data.Attributes.Find(x => x.Name == attr.inverseAttrName);
-                var targetData = (Entity) Listener.TypeData[attr.entityName];
-                var targetAttrTypeData = targetData.Attributes.Find(x => x.Name == attr.name);
-                if (inverseAttrTypeData.IsCollection)
-                {
-                    if (targetAttrTypeData.IsCollection)
-                    {
-                    var process = $@"
-if (this.{inverseAttrTypeData.ParameterName} != null) {{
-    for (
-    this.{inverseAttrTypeData.ParameterName}. 
-}}";
-                    }
-                    else
-                    {
-                        
-                    }
-                }
-                else
-                {
-                    if (targetAttrTypeData.IsCollection)
-                    {
-                        
-                    }
-                    else
-                    {
-                        
-                    }
-                }
-            }
-            
-            processRelationship = $@"
-    private void set{data.Name}Relationship() {{
 
-    }}";
-        }
 
         var classStr = $@"{package};
 
@@ -340,8 +374,8 @@ public {modifier} {data.Name} extends {super} {GetSelectImplementsString(data.Na
 {constructorTokens}
 {constructors}
 {StepParameters(data)}
-}}
 {processRelationship}
+}}
 ";
         return classStr;
     }
@@ -420,7 +454,7 @@ public class IfcRegistry {{
 
     public string Assignment(AttributeData data)
     {
-        return $"\t\t\tthis.{data.Name.fieldName()} = {data.ParameterName};";
+        return $"\t\tthis.{data.Name.fieldName()} = {data.ParameterName};";
     }
 
     public string Allocation(AttributeData data)
@@ -429,7 +463,7 @@ public class IfcRegistry {{
         {
             var dataType = data.Type;
             if (dataType.StartsWith("Collection")) dataType = "ArrayList<>";
-            return $"\t\t\tthis.{data.Name.fieldName()} = new {dataType}();";
+            return $"\t\tthis.{data.Name.fieldName()} = new {dataType}();";
         }
 
         return string.Empty;
