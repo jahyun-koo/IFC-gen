@@ -333,7 +333,7 @@ if (this.{inverseAttrTypeData.ParameterName} != null) {{
 {Allocations(data, true)}
 {Assignments(data, false)}
         {callProcessRelationship}
-		}}
+    }}
     /// <summary>
     /// Construct a {data.Name} with required and optional attributes.
     /// </summary>
@@ -342,7 +342,7 @@ if (this.{inverseAttrTypeData.ParameterName} != null) {{
 {Allocations(data, false)}
 {Assignments(data, true)}
         {callProcessRelationship}
-		}}";
+    }}";
         else
             constructors = $@"
     /// <summary>
@@ -353,7 +353,7 @@ if (this.{inverseAttrTypeData.ParameterName} != null) {{
 {Allocations(data, true)}
 {Assignments(data, false)}
         {callProcessRelationship}
-		}}";
+    }}";
 
 
         var classStr = $@"{package};
